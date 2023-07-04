@@ -242,11 +242,11 @@ def get_ner_id_map():
     ner_id_map = {
         0: "O",
         1: "L-DEMO",
-        2: "L_BA",
+        2: "L-BA",
         3: "V-BA",
-        4: "L_GROUND",
-        5: "L_BALL",
-        6: "L_SPEED",
+        4: "L-GROUND",
+        5: "L-BALL",
+        6: "L-SPEED",
         7: "V-SPEED",
         8: "L-DIR",
         9: "V-DIR",
@@ -265,11 +265,11 @@ def get_ner_tag_map():
     ner_tag_map = {
         "O": 0,
         "L-DEMO": 1,
-        "L_BA": 2,
+        "L-BA": 2,
         "V-BA": 3,
-        "L_GROUND": 4,
-        "L_BALL": 5,
-        "L_SPEED": 6,
+        "L-GROUND": 4,
+        "L-BALL": 5,
+        "L-SPEED": 6,
         "V-SPEED": 7,
         "L-DIR": 8,
         "V-DIR": 9,
@@ -295,60 +295,60 @@ def get_sentences_template():
             ['I wrecked my car.', [0,1,0,0]]
         ],
         'boost_amount': [
-            ['My current boost is *r.', []],
-            ['I currenly have *r percent boost.', []],
-            ['I have *r boost.', []],
-            ['My boost is *r percent.', []],
+            ['My current boost is *r.', [0,2,2,0,3]],
+            ['I currenly have *r percent boost.', [0,2,0,3,0,2]],
+            ['I have *r boost.', [0,0,3,2]],
+            ['My boost is *r percent.', [0,2,0,3,0]],
         ],
         'on_ground': [
-            ['My car is on the ground.', []],
-            ["I'm on the ground.", []],
-            ["I'm not in the air.", []],
-            ["I'm currently driving on the ground.", []]
+            ['My car is on the ground.', [0,0,0,4,0,4]],
+            ["I'm on the ground.", [0,4,0,4]],
+            ["I'm not in the air.", [0,4,0,0,4]],
+            ["I'm currently driving on the ground.", [0,0,0,4,0,4]]
         ],
         'ball_touched': [
-            ['I have the ball!', []],
-            ["I've got the ball!", []],
-            ["I currently have the ball.", []],
-            ["The ball is in my possession.", []],
+            ['I have the ball!', [0,5,0,5]],
+            ["I've got the ball!", [0,5,0,5]],
+            ["I currently have the ball.", [0,0,5,0,5]],
+            ["The ball is in my possession.", [0,5,0,0,5,5]],
         ],
         'speed': [
-            ['My current speed is *r.', []],
-            ["I'm travelling *r miles per hour.", []],
-            ['My current speed is *r mph.', []],
-            ['My current speed is *r miles per hour.', []]
+            ['My current speed is *r.', [0,0,6,0,7]],
+            ["I'm travelling *r miles per hour.", [0,0,7,6,6,6]],
+            ['My current speed is *r mph.', [0,0,6,0,7,6]],
+            ['My current speed is *r miles per hour.', [0,0,6,0,7,6,6,6]]
         ],
         'direction': [
-            ["I'm currently travelling *r.", []],
-            ["I'm heading in the *r direction.", []],
-            ['My current direction is *r.', []],
-            ["I'm heading *r.", []],
+            ["I'm currently travelling *r.", [0,8,8,9]],
+            ["I'm heading in the *r direction.", [0,8,0,0,9,8]],
+            ['My current direction is *r.', [0,8,8,0,9]],
+            ["I'm heading *r.", [0,8,9]],
         ],
         'position': [],
         'action': {
             'handbrake': [
-                ["I'm currently braking.", []],
-                ["I pressed the brakes.", []],
-                ["I'm stopping", []],
-                ["I stopped.", []],
+                ["I'm currently braking.", [0,10,10]],
+                ["I pressed the brakes.", [0,10,0,10]],
+                ["I'm stopping", [0,10]],
+                ["I stopped.", [0,10]],
             ],
             'steer': [
-                ["I'm steering *r.", []],
-                ["I'm turning *r.", []],
-                ['I turned *r.', []],
-                ["I'm about to turn *r.", []],
+                ["I'm steering *r.", [0,11,12]],
+                ["I'm turning *r.", [0,11,12]],
+                ['I turned *r.', [0,11,12]],
+                ["I'm about to turn *r.", [0,0,0,11,12]],
             ],
             'throttle': [
-                ["I'm driving *r.", []],
-                ["I'm going *r.", []],
-                ["I'm moving *r.", []],
-                ["I'm travelling *r.", []]
+                ["I'm driving *r.", [0,13,14]],
+                ["I'm going *r.", [0,13,14]],
+                ["I'm moving *r.", [0,13,14]],
+                ["I'm travelling *r.", [0,13,14]]
             ],
             'boost': [
-                ["I've used boost.", []],
-                ["I'm using boost.", []],
-                ["I've used the speed up.", []],
-                ["I have boosted.", []]
+                ["I've used boost.", [0,15,15]],
+                ["I'm using boost.", [0,15,15]],
+                ["I've used the speed up.", [0,15,0,15,15]],
+                ["I have boosted.", [0,15,15]]
             ]
         }        
     }
