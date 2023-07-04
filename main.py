@@ -161,6 +161,8 @@ def get_sentence(obj, percept=None, action=None):
 
 
 
+
+
 # Accepts the measures and action as an input
 # returns the target sentence
 def get_target_sentence(obj, action):
@@ -244,7 +246,7 @@ def get_sentences_template():
             ],
         'boost_amount': [
             'My current boost is *r.', 
-            'I currenly have *r percent boost.', 
+            'I currently have *r percent boost.', 
             'I have *r boost.', 
             'My boost is *r percent.'
             ],
@@ -301,34 +303,64 @@ def get_sentences_template():
         },
         "relation": {
             "is_demoed": [
-
+                ["demolished"],
+                ["exploded"],
+                ["crashed"],
+                ["wrecked"]
             ],
             "boost_amount": [
-
+                ["boost", "is", "current"],
+                ["have", "boost", "currently"],
+                ["have", "boost"],
+                ["boost", "is"]
             ],
             "on_ground": [
-
+                ["on", "ground"],
+                ["on", "ground"],
+                ["not", "air"],
+                ["on", "ground", "currently"]
             ],
             "ball_touched": [
-
+                ["have", "ball"],
+                ["got", "ball"],
+                ["have", "ball", "currently"],
+                ["ball", "my"]
             ],
             "speed": [
-
+                ["speed", "current"],
+                ["travelling", "miles", "per", "hour"],
+                ["speed", "mph", "current"],
+                ["speed", "miles", "per", "hour", "current"]
             ],
             "direction": [
-
+                ["travelling", "currently"],
+                ["heading", "direction"],
+                ["direction", "is", "current"],
+                ["heading"]
+                
             ],
             "handbrake": [
-
+                ["braking", "currently"],
+                ["pressed", "brakes"],
+                ["stopping"],
+                ["stopped"]
             ],
             "steer": [
-
+                ["steering"],
+                ["turning"],
+                ["turned"],
+                ["turn"]
             ],
             "boost": [
-
+                ["used", "boost"],
+                ["using", "boost"],
+                ["used", "speed", "up"]
             ],
             "throttle": [
-
+                ["driving"],
+                ["going"],
+                ["moving"],
+                ["travelling"]
             ]
 
         }        
