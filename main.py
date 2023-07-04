@@ -65,10 +65,6 @@ def get_direction(heading):
 
 
 
-        
-    
-
-
 # temporary work around input file format
 def get_action_obj(action):
     action_obj = {}
@@ -108,8 +104,6 @@ def get_position_sentence(x,y):
         pos.append('near the north wall')
     sentence = f"I'm {pos[0]} {' and '.join(pos[1:])}".strip() +'.'
     return sentence
-
-
 
 
 
@@ -193,7 +187,7 @@ def get_target_sentence(obj, action):
 
             case 2:
                 index = get_index()
-                text = template["speed"]["index"]
+                text = template["speed"][index]
                 value = obj['speed']
                 sentence += f" {replace_placeholder(text, value)}"
 
@@ -305,6 +299,34 @@ def get_sentences_template():
             "is_demoed": [
 
             ],
+            "boost_amount": [
+
+            ],
+            "on_ground": [
+
+            ],
+            "ball_touched": [
+
+            ],
+            "speed": [
+
+            ],
+            "direction": [
+
+            ],
+            "handbrake": [
+
+            ],
+            "steer": [
+
+            ],
+            "boost": [
+
+            ],
+            "throttle": [
+
+            ]
+
 
         }
 
@@ -339,14 +361,21 @@ def get_oracle(dataset):
             obj = {}
             action = get_action_obj(data['action'])
             data = data['state']['measurements']
-            # obj['input'] = f"{get_input_sentence(data)} {' '.join(f'{key} {action[key]}' for key in action.keys())}".replace('  ', ' ')
+            action_string = ' '.join(f'{key} {action[key]}' for key in action.keys())
+            obj['input'] = f"{get_input_sentence(data)} {action_string}".replace('  ', ' ')
+            obj['target'] = get_target_sentence(data, action).replace('  ', ' ')
 
             obj['relation'] = get_relation_sentence(data, action)
 
 
 
-    #         obj['target'] = get_target_sentence(data, action).replace('  ', ' ')
-    #         data_list.append(obj)
+
+
+            # data_list.append(obj)
+
+
+
+
     # print(len(data_list))
     # oracle['all_data'] = remove_duplicates(data_list)
     # print(len(oracle['all_data']))
@@ -399,9 +428,13 @@ def write_oracle(oracle):
 def main():
     seed(10)
     dataset = get_dataset(INPUT_PATH)
-    oracle = get_oracle(dataset)
+
+    test_dataset = dataset[0:100]
+
+
+    oracle = get_oracle(test_dataset)
     # print(oracle)
-    write_oracle(oracle)
+    # write_oracle(oracle)
 
 
 
