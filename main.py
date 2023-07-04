@@ -8,7 +8,6 @@ This program takes the parsed q file and creates an oracle for the training and 
 
 from os import getcwd
 from json import load, dump, loads, dumps
-from datetime import datetime
 from random import randint, seed, shuffle
 
 
@@ -20,8 +19,6 @@ VALID_OUTPUT_PATH = getcwd() + '\\output\\oracle-valid.json'
 
 
 OUTPUT_PATH = getcwd() + '\\output\\oracle-v1.json'
-
-
 
 
 
@@ -39,8 +36,6 @@ def get_input_sentence(obj):
             output += f'{key} {str(obj[key])}'
 
     return output
-
-
 
 
 
@@ -150,6 +145,22 @@ def replace_placeholder(text, value):
 
 
 
+def get_sentence(obj, percept=None, action=None):
+    template = get_sentences_template()
+    index = get_index()
+    if percept:
+        sentence = template[percept][index]
+        if percept != "direction":
+            value = obj[percept]
+        else:
+            value = get_direction(obj[percept])
+    else:
+        sentence = template["action"][action][index]
+        value = obj[action]
+    return replace_placeholder(sentence, value)
+
+
+
 # Accepts the measures and action as an input
 # returns the target sentence
 def get_target_sentence(obj, action):
@@ -157,67 +168,60 @@ def get_target_sentence(obj, action):
     sentence = ''
     template = get_sentences_template()
 
-
     # select sentences from the template and replace the attributes as necessary
     if obj['is_demoed']:
         index = get_index()
         return template['is_demoed'][index]
-    
+
+    # Create sentences for each percept and action
     num_sentences = 7
     nums = [i for i in range(num_sentences)]
     shuffle(nums)
 
     for num in nums:
 
-
         match num:
-
+            # Percept (boost_amount)
             case 0:
                 if obj['boost_amount'] > 0:
-                    index = get_index()
-                    text = template['boost_amount'][index]
-                    value = obj['boost_amount']
-                    sentence += f" {replace_placeholder(text, value)}"
+                    text = get_sentence(obj, "boost_amount")
+                    sentence += f" {text}"
 
+            # Percept(on_ground)
             case 1:
     
                 if obj['on_ground']:
                     index = get_index()
                     sentence += f" {template['on_ground'][index]}"
 
+            # Percept(speed)
             case 2:
-                index = get_index()
-                text = template["speed"][index]
-                value = obj['speed']
-                sentence += f" {replace_placeholder(text, value)}"
+                text = get_sentence(obj, "speed")
+                sentence += f" {text}"
 
+            # Percept(Direction)
             case 3:
-                index = get_index()
-                text = template['direction'][index]
-                value = get_direction(obj['direction'])
-                sentence += f" {replace_placeholder(text, value)}"
+                text = get_sentence(obj, "direction")
+                sentence += f" {text}"
 
+            # Percept(Position)
             case 4:
-                index = get_index()
                 sentence += f" {get_position_sentence(pos[0], pos[1])}"
 
+            # Action(Brake) or (Action(Steer) and/or Action(Throttle))
             case 5:
                 if action['handbrake']:
                     index = get_index()
                     sentence += f" {template['action']['handbrake'][index]}"
                 else:
-                    index1 = get_index()
-                    text1 = template['action']['steer'][index1]
-                    value1 = get_action('steer', action['steer'])
+                    text1 = text = get_sentence(action, action="steer")
+                    text2 = text = get_sentence(action, action="throttle")
 
-                    index2 = get_index()
-                    text2 = template['action']['throttle'][index2]
-                    value2 = get_action('throttle', action['throttle'])
-
-                    temp1 = f" {replace_placeholder(text1, value1)}".replace('.', '')
-                    temp2 = f"{replace_placeholder(text2, value2)}"
+                    temp1 = f" {text1}".replace('.', '')
+                    temp2 = f"{text2}"
                     sentence += f" {' and '.join([temp1, temp2])}"
 
+            # Action(Boost)
             case 6:
                 if action['boost']:
                     index = get_index()
@@ -327,11 +331,9 @@ def get_sentences_template():
 
             ]
 
-
-        }
-
-        
+        }        
     }
+
     return template
 
 
@@ -344,9 +346,19 @@ def get_relation_sentence(data, action):
     print(f'Data: {data}\nAction: {action}')
 
 
+
+
+
+
+
 def remove_duplicates(dataset):
     set_of_jsons = set([dumps(d, sort_keys=True) for d in dataset])
     return [loads(t) for t in set_of_jsons]
+
+
+
+
+
 
 
 # returns the oracle from the data set
