@@ -159,23 +159,36 @@ def get_action(key, value):
 def replace_placeholder(text, value):
     return text.replace("*r", str(value))
 
+def get_sentence(template, percept, index):
+    return template[percept][index][0]
+
+
+def get_ner_tags(template, percept, index):
+    return template[percept][index][1]                              
+                                    
+
+def get_action_sentence(template, action, index):
+    return template['action'][action][index][0]
+
+
+def get_action_ner_tags(template, action, index):
+    return template['action'][action][index][1]
 
 
 
-def get_sentence(obj, percept=None, action=None):
-    template = get_sentences_template()
+def get_sentence_and_ner_tags(template, obj, percept=None, action=None):
     index = get_index()
     ner_tags = []
     if percept:
-        sentence = template[percept][index][0]
-        ner_tags = template[percept][index][1]
+        sentence = get_sentence(template, percept, index)
+        ner_tags = get_ner_tags(template, percept, index)
         if percept != "direction":
             value = obj[percept]
         else:
             value = get_direction(obj[percept])
     else:
-        sentence = template["action"][action][index][0]
-        ner_tags = template["action"][action][index][1]
+        sentence = get_action_sentence(template, action, index)
+        ner_tags = get_action_ner_tags(template, action, index)
         value = get_action(action, obj[action])
     return replace_placeholder(sentence, value), ner_tags
 
@@ -192,7 +205,7 @@ def get_target_sentence(obj, action):
     # select sentences from the template and replace the attributes as necessary
     if obj['is_demoed']:
         index = get_index()
-        return template['is_demoed'][index][0], template['is_demoed'][index][1]
+        return get_sentence(template, "is_demoed", index), get_ner_tags(template, "is_demoed", index)
 
     # Create sentences for each percept and action
     num_sentences = 7
@@ -205,7 +218,7 @@ def get_target_sentence(obj, action):
             # Percept (boost_amount)
             case 0:
                 if obj['boost_amount'] > 0:
-                    text = get_sentence(obj, "boost_amount")
+                    text = get_sentence_and_ner_tags(template, obj, "boost_amount")
                     sentence += f" {text[0]}"
                     ner_tags += text[1]
 
@@ -214,17 +227,17 @@ def get_target_sentence(obj, action):
     
                 if obj['on_ground']:
                     index = get_index()
-                    sentence += f" {template['on_ground'][index][0]}"
-                    ner_tags += template['on_ground'][index][1]
+                    sentence += f" {get_sentence(template, 'on_ground', index)}"
+                    ner_tags += get_ner_tags(template, 'on_ground', index)
             # Percept(speed)
             case 2:
-                text = get_sentence(obj, "speed")
+                text = get_sentence_and_ner_tags(template, obj, "speed")
                 sentence += f" {text[0]}"
                 ner_tags += text[1]
 
             # Percept(Direction)
             case 3:
-                text = get_sentence(obj, "direction")
+                text = get_sentence_and_ner_tags(template, obj, "direction")
                 sentence += f" {text[0]}"
                 ner_tags += text[1]
 
@@ -238,11 +251,11 @@ def get_target_sentence(obj, action):
             case 5:
                 if action['handbrake']:
                     index = get_index()
-                    sentence += f" {template['action']['handbrake'][index][0]}"
-                    ner_tags += template['action']['handbrake'][index][1]
+                    sentence += f" {get_action_sentence(template, 'handbrake', index)}"
+                    ner_tags += get_action_ner_tags(template, 'handbrake', index)
                 else:
-                    text1 = get_sentence(action, action="steer")
-                    text2 = get_sentence(action, action="throttle")
+                    text1 = get_sentence_and_ner_tags(template, action, action="steer")
+                    text2 = get_sentence_and_ner_tags(template, action, action="throttle")
 
                     temp1 = f" {text1[0]}".replace('.', '')
                     temp2 = f"{text2[0]}"
@@ -255,8 +268,8 @@ def get_target_sentence(obj, action):
             case 6:
                 if action['boost']:
                     index = get_index()
-                    sentence += f" {template['action']['boost'][index][0]}"
-                    ner_tags += template['action']['boost'][index][1]
+                    sentence += f" {get_action_sentence(template, 'boost', index)}"
+                    ner_tags += get_action_ner_tags(template, 'boost', index)
 
     sentence = sentence.replace("  ", " ").strip()
     # print(sentence.split(' '), len(ner_tags), len(sentence.split(' ')))
@@ -477,9 +490,9 @@ def write_oracle(oracle):
 
 def main():
     seed(10)
-    dataset = get_dataset(INPUT_PATH)
+    dataset = get_dataset(INPUT_PATH)[0:1000]
     oracle = get_oracle(dataset)
-    write_oracle(oracle)
+    # write_oracle(oracle)
 
 
 
