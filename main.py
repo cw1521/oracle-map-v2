@@ -71,7 +71,8 @@ def get_action_obj(action):
 
 
 def get_pos_ner_tags(pos_sentence):
-    tokens = pos_sentence.strip().split()
+    pos_sentence = pos_sentence.strip().replace(".", " .")
+    tokens = pos_sentence.split()
     pos_labels = [
         "quadrant", "1", "2", "3", "4",
         "orange", "blue", "goal", "center",
@@ -396,9 +397,22 @@ def get_sentences_template():
 
 
 
+def get_ner_input_sentence(sentence, ner_tags):
+    ner_input = ""
+    sentence = sentence.replace(".", " .").replace("!", " !")
+    tokens = sentence.split(" ")
+    for tag in ner_tags:
+        if tag != 0:
+            ner_input += f" {tokens[ner_tags.index(tag)]}"
+    return ner_input.strip()
+
+
+
+
 def remove_duplicates(dataset):
     set_of_jsons = set([dumps(d, sort_keys=True) for d in dataset])
     return [loads(t) for t in set_of_jsons]
+
 
 
 
@@ -415,9 +429,10 @@ def get_oracle(dataset):
             action = get_action_obj(data['action'])
             data = data['state']['measurements']
             action_string = ' '.join(f'{key} {action[key]}' for key in action.keys())
-            obj['input'] = f"{get_input_sentence(data)} {action_string}".replace('  ', ' ')
-            obj['target'], obj['ner_tags'] = get_target_sentence(data, action)
-            obj['target'] = obj['target'].replace('  ', ' ')
+            obj['state'] = f"{get_input_sentence(data)} {action_string}".replace('  ', ' ')
+            obj['sentence'], obj['ner_tags'] = get_target_sentence(data, action)
+            obj['sentence'] = obj['sentence'].replace('  ', ' ')
+            obj['ner_sentence'] = get_ner_input_sentence(obj['sentence'], obj['ner_tags'])
             data_list.append(obj)
     print(len(data_list))
     oracle['all_data'] = remove_duplicates(data_list)
@@ -426,6 +441,13 @@ def get_oracle(dataset):
     print(len(oracle['all_data']))
     return split_dataset(oracle)
     
+
+
+
+
+
+
+
 
 
 def split_dataset(oracle):
@@ -490,9 +512,9 @@ def write_oracle(oracle):
 
 def main():
     seed(10)
-    dataset = get_dataset(INPUT_PATH)[0:1000]
+    dataset = get_dataset(INPUT_PATH)
     oracle = get_oracle(dataset)
-    # write_oracle(oracle)
+    write_oracle(oracle)
 
 
 
