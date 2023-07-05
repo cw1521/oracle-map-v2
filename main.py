@@ -17,7 +17,6 @@ TRAIN_OUTPUT_PATH = getcwd() + '\\output\\oracle-train.json'
 
 VALID_OUTPUT_PATH = getcwd() + '\\output\\oracle-valid.json'
 
-
 OUTPUT_PATH = getcwd() + '\\output\\oracle-v1.json'
 
 
@@ -59,8 +58,6 @@ def get_direction(heading):
 
 
 
-
-
 # temporary work around input file format
 def get_action_obj(action):
     action_obj = {}
@@ -73,7 +70,6 @@ def get_action_obj(action):
 
 
 
-
 def get_pos_ner_tags(pos_sentence):
     tokens = pos_sentence.strip().split()
     pos_labels = [
@@ -81,14 +77,12 @@ def get_pos_ner_tags(pos_sentence):
         "orange", "blue", "goal", "center",
         "wall", "north", "south", "east", "west"
     ]
-
     ner_tags = []
     for token in tokens:
         if token in pos_labels:
             ner_tags.append(16)
         else:
             ner_tags.append(0)
-
     return ner_tags
 
 
@@ -96,7 +90,6 @@ def get_pos_ner_tags(pos_sentence):
 
 def get_position_sentence(x,y):
     pos = []
-
     if x >= 0 and y >= 0:
         pos.append('in quadrant 1')
     if x < 0 and y >= 0:
@@ -119,10 +112,8 @@ def get_position_sentence(x,y):
         pos.append('near the south wall')
     if y >= 4120:
         pos.append('near the north wall')
-
     sentence = f"I'm {pos[0]} {' and '.join(pos[1:])}".strip() +'.'
     ner_tags = get_pos_ner_tags(sentence)
-
     return sentence, ner_tags
 
 
@@ -187,8 +178,6 @@ def get_sentence(obj, percept=None, action=None):
         ner_tags = template["action"][action][index][1]
         value = get_action(action, obj[action])
     return replace_placeholder(sentence, value), ner_tags
-
-
 
 
 
@@ -269,13 +258,9 @@ def get_target_sentence(obj, action):
                     sentence += f" {template['action']['boost'][index][0]}"
                     ner_tags += template['action']['boost'][index][1]
 
-    # ner_tags.append(0)
     sentence = sentence.replace("  ", " ").strip()
-    print(sentence.split(' '), len(ner_tags), len(sentence.split(' ')))
+    # print(sentence.split(' '), len(ner_tags), len(sentence.split(' ')))
     return sentence, ner_tags
-
-
-
 
 
 
@@ -393,9 +378,7 @@ def get_sentences_template():
             ]
         }        
     }
-
     return template
-
 
 
 
@@ -403,7 +386,6 @@ def get_sentences_template():
 def remove_duplicates(dataset):
     set_of_jsons = set([dumps(d, sort_keys=True) for d in dataset])
     return [loads(t) for t in set_of_jsons]
-
 
 
 
@@ -426,13 +408,15 @@ def get_oracle(dataset):
             data_list.append(obj)
     print(len(data_list))
     oracle['all_data'] = remove_duplicates(data_list)
+    oracle['ner_tag_map'] = get_ner_tag_map()
+    oracle['ner_id_map'] = get_ner_id_map()
     print(len(oracle['all_data']))
-    return split_dataset(oracle['all_data'])
+    return split_dataset(oracle)
     
 
 
-
-def split_dataset(dataset):
+def split_dataset(oracle):
+    dataset = oracle['all_data']
     i = len(dataset)
     training_len = int(i*0.7)
     validation_len = int(i*0.2)
@@ -443,7 +427,9 @@ def split_dataset(dataset):
     ds = {
         'train': training,
         'valid': validation,
-        'test':testing
+        'test':testing,
+        'ner_id_map': oracle['ner_id_map'],
+        'ner_tag_map': oracle['ner_tag_map']
     }
     return ds
 
@@ -461,24 +447,38 @@ def write_train_oracle(oracle):
     seg = len(oracle['train'])//num_of_segs
     for i in range(num_of_segs):
         with open(TRAIN_OUTPUT_PATH.replace('.', f'{i+1}.'), 'w') as f:
-            dump({'data':oracle['train'][i*seg:(i+1)*seg]}, f, indent=2)   
+            output = {
+                'data': oracle['train'][i*seg:(i+1)*seg],
+                'ner_id_map': oracle['ner_id_map'],
+                'ner_tag_map': oracle['ner_tag_map']
+            }
+            dump(output, f, indent=2)   
 
 
 
 def write_oracle(oracle):
     write_train_oracle(oracle)
     with open(TEST_OUTPUT_PATH, 'w') as f:
-        dump({'data':oracle['test']}, f, indent=2)
+        output = {
+            'data': oracle['test'],
+            'ner_id_map': oracle['ner_id_map'],
+            'ner_tag_map': oracle['ner_tag_map']
+        }
+        dump(output, f, indent=2)
     with open(VALID_OUTPUT_PATH, 'w') as f:
-        dump({'data':oracle['valid']}, f, indent=2)
+        output = {
+            'data': oracle['test'],
+            'ner_id_map': oracle['ner_id_map'],
+            'ner_tag_map': oracle['ner_tag_map']
+        }
+        dump(output, f, indent=2)
 
 
 
 def main():
     seed(10)
     dataset = get_dataset(INPUT_PATH)
-    test_dataset = dataset
-    oracle = get_oracle(test_dataset)
+    oracle = get_oracle(dataset)
     write_oracle(oracle)
 
 
