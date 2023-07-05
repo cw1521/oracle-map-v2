@@ -396,14 +396,13 @@ def get_sentences_template():
 
 
 
-
 def get_ner_input_sentence(sentence, ner_tags):
     ner_input = ""
     sentence = sentence.replace(".", " .").replace("!", " !")
     tokens = sentence.split(" ")
-    for tag in ner_tags:
-        if tag != 0:
-            ner_input += f" {tokens[ner_tags.index(tag)]}"
+    for token in tokens:
+        if ner_tags[tokens.index(token)] != 0:
+            ner_input += f" {token}"
     return ner_input.strip()
 
 
@@ -440,13 +439,6 @@ def get_oracle(dataset):
     oracle['ner_id_map'] = get_ner_id_map()
     print(len(oracle['all_data']))
     return split_dataset(oracle)
-    
-
-
-
-
-
-
 
 
 
