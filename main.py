@@ -427,8 +427,8 @@ def get_oracle(dataset, num_iters):
             obj["state"] = f"{get_input_sentence(data)} {action_string}".replace("  ", " ")
             obj["sentence"], obj["ner_tags"] = get_target_sentence(data, action)
             obj["sentence"] = obj["sentence"].replace("  ", " ")
-            obj["ner_tags"] = list(map(get_ner_tag_str, obj["ner_tags"]))
             obj["ner_sentence"] = get_ner_input_sentence(obj["sentence"], obj["ner_tags"])
+            obj["ner_tags"] = list(map(get_ner_tag_str, obj["ner_tags"]))
             data_list.append(obj)
     print(len(data_list))
     oracle["all_data"] = remove_duplicates(data_list)
@@ -490,9 +490,9 @@ def main():
 
     num_iters = 8
 
-    train_file_div = 10
-    valid_file_div = 3
-    test_file_div = 1
+    train_file_div = 30
+    valid_file_div = 10
+    test_file_div = 5
 
     seed(10)
 
