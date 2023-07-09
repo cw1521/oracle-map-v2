@@ -12,12 +12,12 @@ from random import randint, seed, shuffle
 
 
 INPUT_PATH = getcwd() + '\\input\\state-records-v2_2.json'
-TEST_OUTPUT_PATH = getcwd() + '\\output\\oracle-test.json'
-TRAIN_OUTPUT_PATH = getcwd() + '\\output\\oracle-train.json'
+TEST_OUTPUT_PATH = getcwd() + '\\output\\oracle-test.jsonl'
+TRAIN_OUTPUT_PATH = getcwd() + '\\output\\oracle-train.jsonl'
 
-VALID_OUTPUT_PATH = getcwd() + '\\output\\oracle-valid.json'
+VALID_OUTPUT_PATH = getcwd() + '\\output\\oracle-valid.jsonl'
 
-OUTPUT_PATH = getcwd() + '\\output\\oracle-v1.json'
+OUTPUT_PATH = getcwd() + '\\output\\oracle-v1.jsonl'
 
 
 
@@ -475,11 +475,13 @@ def write_train_oracle(oracle):
     for i in range(num_of_segs):
         with open(TRAIN_OUTPUT_PATH.replace('.', f'{i+1}.'), 'w') as f:
             output = {
-                'data': oracle['train'][i*seg:(i+1)*seg],
-                'ner_id_map': oracle['ner_id_map'],
-                'ner_tag_map': oracle['ner_tag_map']
+                'data': {
+                    'dataset': oracle['train'][i*seg:(i+1)*seg],
+                    'ner_id_map': oracle['ner_id_map'],
+                    'ner_tag_map': oracle['ner_tag_map']
+                }
             }
-            dump(output, f, indent=2)   
+            dump(output, f, indent=4)   
 
 
 
@@ -487,18 +489,22 @@ def write_oracle(oracle):
     write_train_oracle(oracle)
     with open(TEST_OUTPUT_PATH, 'w') as f:
         output = {
-            'data': oracle['test'],
-            'ner_id_map': oracle['ner_id_map'],
-            'ner_tag_map': oracle['ner_tag_map']
+            'data': {
+                'dataset': oracle['test'],
+                'ner_id_map': oracle['ner_id_map'],
+                'ner_tag_map': oracle['ner_tag_map']
+            }
         }
         dump(output, f, indent=2)
     with open(VALID_OUTPUT_PATH, 'w') as f:
         output = {
-            'data': oracle['test'],
-            'ner_id_map': oracle['ner_id_map'],
-            'ner_tag_map': oracle['ner_tag_map']
+            'data': {
+                "dataset": oracle['valid'],
+                'ner_id_map': oracle['ner_id_map'],
+                'ner_tag_map': oracle['ner_tag_map']
+            }
         }
-        dump(output, f, indent=2)
+        dump(output, f, indent=4)
 
 
 
