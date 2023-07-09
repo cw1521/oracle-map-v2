@@ -408,7 +408,8 @@ def remove_duplicates(dataset):
     set_of_jsons = set([dumps(d, sort_keys=True) for d in dataset])
     return [loads(t) for t in set_of_jsons]
 
-
+def get_ner_tag_str(ner_tag):
+    return get_ner_id_map()[ner_tag]
 
 
 # returns the oracle from the data set
@@ -426,6 +427,7 @@ def get_oracle(dataset, num_iters):
             obj["state"] = f"{get_input_sentence(data)} {action_string}".replace("  ", " ")
             obj["sentence"], obj["ner_tags"] = get_target_sentence(data, action)
             obj["sentence"] = obj["sentence"].replace("  ", " ")
+            obj["ner_tags"] = list(map(get_ner_tag_str, obj["ner_tags"]))
             obj["ner_sentence"] = get_ner_input_sentence(obj["sentence"], obj["ner_tags"])
             data_list.append(obj)
     print(len(data_list))
@@ -467,11 +469,7 @@ def write_oracle(oracle, path, ds_type, num_of_segs):
     seg = len(oracle[ds_type])//num_of_segs
     for i in range(num_of_segs):
         file_path = path.replace(".", f"-{i+1}.")
-        output = {
-            "data": oracle[ds_type][i*seg:(i+1)*seg],            
-            "ner_id_map": oracle["ner_id_map"],
-            "ner_tag_map": oracle["ner_tag_map"]
-        }
+        output = oracle[ds_type][i*seg:(i+1)*seg]
         output_str = dumps(output, indent=4)
         print(f"Writing {path.replace('.', f'{i+1}.')} to disk...")
         with open(file_path, "w") as f:
@@ -490,11 +488,11 @@ def main():
     valid_type = "valid"
     test_type = "test"
 
-    num_iters = 64
+    num_iters = 8
 
-    train_file_div = 30
-    valid_file_div = 10
-    test_file_div = 5
+    train_file_div = 10
+    valid_file_div = 3
+    test_file_div = 1
 
     seed(10)
 
