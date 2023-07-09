@@ -443,11 +443,11 @@ def split_dataset(oracle):
     dataset = oracle["all_data"]
     i = len(dataset)
     training_len = int(i*0.7)
-    validation_len = int(i*0.2)
+    testing_len = int(i*0.1)
 
     training = dataset[0:training_len]
-    testing = dataset[training_len+validation_len:i]
-    validation = dataset[training_len:training_len+validation_len]
+    testing = dataset[training_len:training_len+testing_len]
+    validation = dataset[training_len+testing_len:i]
     ds = {
         "train": training,
         "valid": validation,
