@@ -468,11 +468,9 @@ def write_oracle(oracle, path, ds_type, num_of_segs):
     for i in range(num_of_segs):
         file_path = path.replace(".", f"-{i+1}.")
         output = {
-            "data": {
-                "dataset": oracle[ds_type][i*seg:(i+1)*seg],
-                "ner_id_map": oracle["ner_id_map"],
-                "ner_tag_map": oracle["ner_tag_map"]
-            }
+            "data": oracle[ds_type][i*seg:(i+1)*seg],            
+            "ner_id_map": oracle["ner_id_map"],
+            "ner_tag_map": oracle["ner_tag_map"]
         }
         output_str = dumps(output, indent=4)
         print(f"Writing {path.replace('.', f'{i+1}.')} to disk...")
@@ -492,11 +490,11 @@ def main():
     valid_type = "valid"
     test_type = "test"
 
-    num_iters = 8
+    num_iters = 64
 
-    train_file_div = 10
-    valid_file_div = 2
-    test_file_div = 1
+    train_file_div = 30
+    valid_file_div = 10
+    test_file_div = 5
 
     seed(10)
 
