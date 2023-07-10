@@ -7,7 +7,7 @@ This program takes the parsed q file and creates an oracle for the training and 
 from os import getcwd
 from json import load, loads, dumps
 from random import randint, seed, shuffle
-
+from multiprocessing import Pool, cpu_count
 
 
 
@@ -412,31 +412,60 @@ def get_ner_tag_str(ner_tag):
     return get_ner_id_map()[ner_tag]
 
 
+
+def get_data_list(dataset, num_div):
+    div_len = len(dataset) // num_div
+    ds_list = []
+    for i in range(0, len(dataset), div_len):
+        if len(dataset)-i >= div_len:
+            ds_list.append(dataset[i:i+div_len])
+        else:
+            ds_list.append(dataset[i:])
+    return ds_list
+
+
+
+def get_data_obj_list(data_list):
+    data_obj_list = []
+    for data in data_list:
+        obj = create_data_obj(data)
+        data_obj_list.append(obj)
+    return data_obj_list
+
+
 # returns the oracle from the data set
 def get_oracle(dataset, num_iters):
+    num_proc = cpu_count()-1
     oracle = {}
-    data_list = []
+    result_list = []
     oracle["all_data"] = []
     oracle["data"] = {}
-    for i in range(num_iters):
-        for data in dataset:
-            obj = {}
-            action = get_action_obj(data["action"])
-            data = data["state"]["measurements"]
-            action_string = " ".join(f"{key} {action[key]}" for key in action.keys())
-            obj["state"] = f"{get_input_sentence(data)} {action_string}".replace("  ", " ")
-            obj["sentence"], obj["ner_tags"] = get_target_sentence(data, action)
-            obj["sentence"] = obj["sentence"].replace("  ", " ")
-            obj["ner_sentence"] = get_ner_input_sentence(obj["sentence"], obj["ner_tags"])
-            obj["ner_tags"] = list(map(get_ner_tag_str, obj["ner_tags"]))
-            data_list.append(obj)
-    print(len(data_list))
-    oracle["all_data"] = remove_duplicates(data_list)
+    for _ in range(num_iters):
+        data_list = get_data_list(dataset, num_proc)
+        results = []
+        with Pool(num_proc) as p:
+            results = p.map(get_data_obj_list, data_list)
+        result_list += results
+    dataset = [data for result in result_list for data in result]
+    print(f"Size of Oracle with duplicates: {len(oracle)}")
+    oracle["all_data"] = remove_duplicates(dataset)
     oracle["ner_tag_map"] = get_ner_tag_map()
     oracle["ner_id_map"] = get_ner_id_map()
-    print(len(oracle["all_data"]))
+    print(f"Size of Oracle withot duplicates: {len(oracle['all_data'])}")
     return split_dataset(oracle)
 
+
+def create_data_obj(data):
+    obj = {}
+    action = get_action_obj(data["action"])
+    data = data["state"]["measurements"]
+    action_string = " ".join(f"{key} {action[key]}" for key in action.keys())
+    obj["state"] = f"{get_input_sentence(data)} {action_string}".replace("  ", " ")
+    obj["sentence"], obj["ner_tags"] = get_target_sentence(data, action)
+    obj["sentence"] = obj["sentence"].replace("  ", " ")
+    obj["ner_sentence"] = get_ner_input_sentence(obj["sentence"], obj["ner_tags"])
+    obj["ner_tags"] = list(map(get_ner_tag_str, obj["ner_tags"]))
+    return obj
 
 
 def split_dataset(oracle):
@@ -470,38 +499,64 @@ def write_oracle(oracle, path, ds_type, num_of_segs):
     for i in range(num_of_segs):
         file_path = path.replace(".", f"-{i+1}.")
         output = oracle[ds_type][i*seg:(i+1)*seg]
-        output_str = dumps(output, indent=4)
-        print(f"Writing {path.replace('.', f'{i+1}.')} to disk...")
+        output_str = dumps(output, indent=2)
+        print(f"Writing {path.replace('.', f'-{i+1}.')} to disk...")
         with open(file_path, "w") as f:
             f.write(output_str)
 
+
+def generate_oracle_dataset(args):
+    oracle = get_oracle(args[0], args[1])
+    write_oracle(oracle, args[8], args[5], args[2])
+    write_oracle(oracle, args[9], args[6], args[3])
+    write_oracle(oracle, args[10], args[7], args[4])
+    print("Database created")
 
 
 
 def main():
     input_path = f"{getcwd()}\\input\\state-records-v2_2.json"
+
     test_output_path = f"{getcwd()}\\output\\oracle-test.jsonl"
     train_output_path = f"{getcwd()}\\output\\oracle-train.jsonl"
     valid_output_path = f"{getcwd()}\\output\\oracle-valid.jsonl"
+
+    test_output_path1 = f"{getcwd()}\\output1\\oracle-test.jsonl"
+    train_output_path1 = f"{getcwd()}\\output1\\oracle-train.jsonl"
+    valid_output_path1 = f"{getcwd()}\\output1\\oracle-valid.jsonl"
 
     train_type = "train"
     valid_type = "valid"
     test_type = "test"
 
     num_iters = 8
-
     train_file_div = 30
     valid_file_div = 10
     test_file_div = 5
 
+    num_iters1 = 64
+    train_file_div1 = 200
+    valid_file_div1 = 60
+    test_file_div1 = 20
+
     seed(10)
 
     dataset = get_dataset(input_path)
-    oracle = get_oracle(dataset, num_iters)
 
+    oracle = get_oracle(dataset, num_iters)
     write_oracle(oracle, train_output_path, train_type, train_file_div)
     write_oracle(oracle, valid_output_path, valid_type, valid_file_div)
     write_oracle(oracle, test_output_path, test_type, test_file_div)
+
+    print(f"Oracle 1 written to disk.")
+
+    oracle1 = get_oracle(dataset, num_iters1)
+    write_oracle(oracle1, train_output_path1, train_type, train_file_div1)
+    write_oracle(oracle1, valid_output_path1, valid_type, valid_file_div1)
+    write_oracle(oracle1, test_output_path1, test_type, test_file_div1)
+
+    print(f"Oracle 2 written to disk.")
+
 
 
 
