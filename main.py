@@ -4,7 +4,7 @@ Thesis
 17 September 2022
 This program takes the parsed q file and creates an oracle for the training and testing data.
 """
-from os import getcwd
+from os import getcwd, path, makedirs
 from json import load, loads, dumps
 from random import randint, seed, shuffle
 from multiprocessing import Pool, cpu_count
@@ -447,11 +447,11 @@ def get_oracle(dataset, num_iters):
             results = p.map(get_data_obj_list, data_list)
         result_list += results
     dataset = [data for result in result_list for data in result]
-    print(f"Size of Oracle with duplicates: {len(oracle)}")
+    print(f"Size of Oracle with duplicates: {len(dataset)}")
     oracle["all_data"] = remove_duplicates(dataset)
     oracle["ner_tag_map"] = get_ner_tag_map()
     oracle["ner_id_map"] = get_ner_id_map()
-    print(f"Size of Oracle withot duplicates: {len(oracle['all_data'])}")
+    print(f"Size of Oracle without duplicates: {len(oracle['all_data'])}")
     return split_dataset(oracle)
 
 
@@ -514,16 +514,26 @@ def generate_oracle_dataset(args):
 
 
 
+def create_dirs(dirs):
+    for dir in dirs:
+        if not path.exists(dir):
+            makedirs(dir)
+
 def main():
+    output_dirs = [
+        f"{getcwd()}\\output",
+        f"{getcwd()}\\output\\oracle",
+        f"{getcwd()}\\output\\oracle-lg"
+        ]
     input_path = f"{getcwd()}\\input\\state-records-v2_2.json"
 
-    test_output_path = f"{getcwd()}\\output\\oracle-test.jsonl"
-    train_output_path = f"{getcwd()}\\output\\oracle-train.jsonl"
-    valid_output_path = f"{getcwd()}\\output\\oracle-valid.jsonl"
+    test_output_path = f"{getcwd()}\\output\\oracle\\oracle-test.jsonl"
+    train_output_path = f"{getcwd()}\\output\\oracle\\oracle-train.jsonl"
+    valid_output_path = f"{getcwd()}\\output\\oracle\\oracle-valid.jsonl"
 
-    test_output_path1 = f"{getcwd()}\\output1\\oracle-test.jsonl"
-    train_output_path1 = f"{getcwd()}\\output1\\oracle-train.jsonl"
-    valid_output_path1 = f"{getcwd()}\\output1\\oracle-valid.jsonl"
+    test_output_path1 = f"{getcwd()}\\output\\oracle-lg\\oracle-test.jsonl"
+    train_output_path1 = f"{getcwd()}\\output\\oracle-lg\\oracle-train.jsonl"
+    valid_output_path1 = f"{getcwd()}\\output\\oracle-lg\\oracle-valid.jsonl"
 
     train_type = "train"
     valid_type = "valid"
@@ -540,6 +550,8 @@ def main():
     test_file_div1 = 20
 
     seed(10)
+
+    create_dirs(output_dirs)
 
     dataset = get_dataset(input_path)
 
