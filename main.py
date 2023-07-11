@@ -434,7 +434,7 @@ def get_data_obj_list(data_list):
 
 # returns the oracle from the data set
 def get_oracle(dataset, num_iters):
-    num_proc = cpu_count()-1
+    num_proc = cpu_count()-8
     oracle = {}
     result_list = []
     oracle["all_data"] = []
@@ -462,6 +462,8 @@ def create_data_obj(data):
     obj["state"] = f"{get_input_sentence(data)} {action_string}".replace("  ", " ")
     obj["sentence"], obj["ner_tags"] = get_target_sentence(data, action)
     obj["sentence"] = obj["sentence"].replace("  ", " ")
+    obj["tokens"] = obj["sentence"].replace(".", " .").replace("!", " !").split(" ")
+    obj["ner_ids"] = obj["ner_tags"]
     obj["ner_sentence"] = get_ner_input_sentence(obj["sentence"], obj["ner_tags"])
     obj["ner_tags"] = list(map(get_ner_tag_str, obj["ner_tags"]))
     return obj
