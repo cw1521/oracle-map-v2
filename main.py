@@ -8,7 +8,7 @@ from os import getcwd, path, makedirs
 from json import load, loads, dumps
 from random import randint, seed, shuffle
 from multiprocessing import Pool, cpu_count
-
+import jsonlines
 
 
 
@@ -204,9 +204,8 @@ def get_target_sentence(obj, action):
     num_sentences = 7
     nums = [i for i in range(num_sentences)]
     shuffle(nums)
-
+    
     for num in nums:
-
         match num:
             # Percept (boost_amount)
             case 0:
@@ -499,10 +498,9 @@ def write_oracle(oracle, path, ds_type, num_of_segs):
     for i in range(num_of_segs):
         file_path = path.replace(".", f"-{i+1}.")
         output = oracle[ds_type][i*seg:(i+1)*seg]
-        output_str = dumps(output, indent=2)
         print(f"Writing {path.replace('.', f'-{i+1}.')} to disk...")
-        with open(file_path, "w") as f:
-            f.write(output_str)
+        with jsonlines.open(file_path, "w") as writer:
+            writer.write_all(output)
 
 
 def generate_oracle_dataset(args):
@@ -540,14 +538,14 @@ def main():
     test_type = "test"
 
     num_iters = 8
-    train_file_div = 30
-    valid_file_div = 10
-    test_file_div = 5
+    train_file_div = 8
+    valid_file_div = 2
+    test_file_div = 1
 
     num_iters1 = 64
-    train_file_div1 = 200
-    valid_file_div1 = 60
-    test_file_div1 = 20
+    train_file_div1 = 50
+    valid_file_div1 = 15
+    test_file_div1 = 10
 
     seed(10)
 
