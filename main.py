@@ -28,8 +28,6 @@ def get_input_sentence(obj):
     return output
 
 
-
-
 def get_direction(heading):
     if heading >= 337 or heading < 22:
         return "east"
@@ -49,7 +47,6 @@ def get_direction(heading):
         return "southeast"
 
 
-
 # temporary work around input file format
 def get_action_obj(action):
     action_obj = {}
@@ -59,7 +56,6 @@ def get_action_obj(action):
     action_obj["boost"] = action[6]
     action_obj["handbrake"] = action[7]
     return action_obj
-
 
 
 def get_pos_ner_tags(pos_sentence):
@@ -77,8 +73,6 @@ def get_pos_ner_tags(pos_sentence):
         else:
             ner_tags.append(0)
     return ner_tags
-
-
 
 
 def get_position_sentence(x,y):
@@ -111,13 +105,11 @@ def get_position_sentence(x,y):
     return sentence, ner_tags
 
 
-
 def get_interval():
     mid = randint(2, 99)
     low = randint(1, mid-1)
     high = randint((mid+1), 100)
     return low, mid, high
-
 
 
 def get_index():
@@ -133,7 +125,6 @@ def get_index():
         return 3
 
 
-
 def get_action(key, value):
     if key == "steer":
         if value == -1:
@@ -147,9 +138,9 @@ def get_action(key, value):
             return "backwards"
 
 
-
 def replace_placeholder(text, value):
     return text.replace("*r", str(value))
+
 
 def get_sentence(template, percept, index):
     return template[percept][index][0]
@@ -167,7 +158,6 @@ def get_action_ner_tags(template, action, index):
     return template["action"][action][index][1]
 
 
-
 def get_sentence_and_ner_tags(template, obj, percept=None, action=None):
     index = get_index()
     ner_tags = []
@@ -183,7 +173,6 @@ def get_sentence_and_ner_tags(template, obj, percept=None, action=None):
         ner_tags = get_action_ner_tags(template, action, index)
         value = get_action(action, obj[action])
     return replace_placeholder(sentence, value), ner_tags
-
 
 
 # Accepts the measures and action as an input
@@ -272,7 +261,6 @@ def get_target_sentence(obj, action):
     return sentence, ner_tags
 
 
-
 def get_ner_id_map():
     ner_id_map = {
         0: "O",
@@ -319,7 +307,6 @@ def get_ner_tag_map():
     return ner_tag_map
 
 
-
 # returns the sentences template
 def get_sentences_template():
     template = {
@@ -337,9 +324,9 @@ def get_sentences_template():
         ],
         "on_ground": [
             ["My car is on the ground.", [0,0,0,4,0,4,0]],
-            ["I'M on the ground.", [0,4,0,4,0]],
-            ["I'M not in the air.", [0,4,0,0,4,0]],
-            ["I'M currently driving on the ground.", [0,0,0,4,0,4,0]]
+            ["I'm on the ground.", [0,4,0,4,0]],
+            ["I'm not in the air.", [0,4,0,0,4,0]],
+            ["I'm currently driving on the ground.", [0,0,0,4,0,4,0]]
         ],
         "ball_touched": [
             ["I have the ball!", [0,5,0,5,0]],
@@ -354,41 +341,40 @@ def get_sentences_template():
             ["My current speed is *r miles per hour.", [0,0,6,0,7,6,6,6,0]]
         ],
         "direction": [
-            ["I'M currently travelling *r.", [0,8,8,9,0]],
-            ["I'M heading in the *r direction.", [0,8,0,0,9,8,0]],
+            ["I'm currently travelling *r.", [0,8,8,9,0]],
+            ["I'm heading in the *r direction.", [0,8,0,0,9,8,0]],
             ["My current direction is *r.", [0,8,8,0,9,0]],
-            ["I'M heading *r.", [0,8,9,0]],
+            ["I'm heading *r.", [0,8,9,0]],
         ],
         "position": [],
         "action": {
             "handbrake": [
-                ["I'M currently braking.", [0,10,10,0]],
+                ["I'm currently braking.", [0,10,10,0]],
                 ["I pressed the brakes.", [0,10,0,10,0]],
-                ["I'M stopping", [0,10,0]],
+                ["I'm stopping", [0,10,0]],
                 ["I stopped.", [0,10,0]],
             ],
             "steer": [
-                ["I'M steering *r.", [0,11,12,0]],
-                ["I'M turning *r.", [0,11,12,0]],
+                ["I'm steering *r.", [0,11,12,0]],
+                ["I'm turning *r.", [0,11,12,0]],
                 ["I turned *r.", [0,11,12,0]],
-                ["I'M about to turn *r.", [0,0,0,11,12,0]],
+                ["I'm about to turn *r.", [0,0,0,11,12,0]],
             ],
             "throttle": [
-                ["I'M driving *r.", [0,13,14,0]],
-                ["I'M going *r.", [0,13,14,0]],
-                ["I'M moving *r.", [0,13,14,0]],
-                ["I'M travelling *r.", [0,13,14,0]]
+                ["I'm driving *r.", [0,13,14,0]],
+                ["I'm going *r.", [0,13,14,0]],
+                ["I'm moving *r.", [0,13,14,0]],
+                ["I'm travelling *r.", [0,13,14,0]]
             ],
             "boost": [
                 ["I've used boost.", [0,15,15,0]],
-                ["I'M using boost.", [0,15,15,0]],
+                ["I'm using boost.", [0,15,15,0]],
                 ["I've used the speed up.", [0,15,0,15,15,0]],
                 ["I have boosted.", [0,15,15,0]]
             ]
         }        
     }
     return template
-
 
 
 def get_ner_input_sentence(sentence, ner_tags):
@@ -399,8 +385,6 @@ def get_ner_input_sentence(sentence, ner_tags):
         if ner_tags[tokens.index(token)] != 0:
             ner_input += f" {token}"
     return ner_input.strip()
-
-
 
 
 def remove_duplicates(dataset):
@@ -434,7 +418,7 @@ def get_data_obj_list(data_list):
 
 # returns the oracle from the data set
 def get_oracle(dataset, num_iters):
-    num_proc = cpu_count()-8
+    num_proc = cpu_count()//2
     oracle = {}
     result_list = []
     oracle["all_data"] = []
@@ -488,7 +472,6 @@ def split_dataset(oracle):
     return ds
 
 
-
 def get_dataset(file_path):
     with open(file_path) as f:
         dataset = load(f)
@@ -506,18 +489,21 @@ def write_oracle(oracle, path, ds_type, num_of_segs):
 
 
 def generate_oracle_dataset(args):
-    oracle = get_oracle(args[0], args[1])
-    write_oracle(oracle, args[8], args[5], args[2])
-    write_oracle(oracle, args[9], args[6], args[3])
-    write_oracle(oracle, args[10], args[7], args[4])
+    train_type = "train"
+    valid_type = "valid"
+    test_type = "test"
+    oracle = get_oracle(args["dataset"], args["num_iters"])
+    write_oracle(oracle, args["train_opath"], train_type, args["train_file_div"])
+    write_oracle(oracle, args["valid_opath"], valid_type, args["valid_file_div"])
+    write_oracle(oracle, args["test_opath"], test_type, args["test_file_div"])
     print("Database created")
-
 
 
 def create_dirs(dirs):
     for dir in dirs:
         if not path.exists(dir):
             makedirs(dir)
+
 
 def main():
     output_dirs = [
@@ -535,10 +521,6 @@ def main():
     train_output_path1 = f"{getcwd()}\\output\\oracle-lg\\oracle-train.jsonl"
     valid_output_path1 = f"{getcwd()}\\output\\oracle-lg\\oracle-valid.jsonl"
 
-    train_type = "train"
-    valid_type = "valid"
-    test_type = "test"
-
     num_iters = 8
     train_file_div = 8
     valid_file_div = 2
@@ -553,20 +535,35 @@ def main():
 
     create_dirs(output_dirs)
 
+    print("Generating Oracle dataset...")
     dataset = get_dataset(input_path)
 
-    oracle = get_oracle(dataset, num_iters)
-    write_oracle(oracle, train_output_path, train_type, train_file_div)
-    write_oracle(oracle, valid_output_path, valid_type, valid_file_div)
-    write_oracle(oracle, test_output_path, test_type, test_file_div)
+    oracle_args = {
+        "dataset": dataset,
+        "num_iters": num_iters,
+        "train_opath": train_output_path,
+        "valid_opath": valid_output_path,
+        "test_opath": test_output_path,
+        "train_file_div": train_file_div,
+        "valid_file_div": valid_file_div,
+        "test_file_div": test_file_div
+    }
 
+    oracle1_args = {
+        "dataset": dataset,
+        "num_iters": num_iters1, 
+        "train_opath": train_output_path1,
+        "valid_opath": valid_output_path1,
+        "test_opath": test_output_path1,
+        "train_file_div": train_file_div1,
+        "valid_file_div": valid_file_div1,
+        "test_file_div": test_file_div1
+    }
+
+    generate_oracle_dataset(oracle_args)
     print(f"Oracle 1 written to disk.")
 
-    oracle1 = get_oracle(dataset, num_iters1)
-    write_oracle(oracle1, train_output_path1, train_type, train_file_div1)
-    write_oracle(oracle1, valid_output_path1, valid_type, valid_file_div1)
-    write_oracle(oracle1, test_output_path1, test_type, test_file_div1)
-
+    generate_oracle_dataset(oracle1_args)
     print(f"Oracle 2 written to disk.")
 
 
